@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Decision Engine — Boys' Occasion Wear</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,800;9..144,900&family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF4E6;
+    --paper:#FFFDF9;
+    --ink:#241A33;
+    --ink-soft:#5C5168;
+    --coral:#FF5747;
+    --magenta:#FF2D87;
+    --amber:#FFB23E;
+    --lime:#84CC16;
+    --sky:#1FA9FF;
+    --emerald:#12B886;
+    --orange:#FF7A1A;
+    --red:#FF3B5C;
+    --line:#2c1f3c14;
+    --shadow:0 18px 40px -22px #4a2a6055;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Outfit',sans-serif;
+    background:
+      radial-gradient(circle at 12% -5%, #FFD9A833 0 40%, transparent 60%),
+      radial-gradient(circle at 95% 0%, #FF2D8722 0 35%, transparent 55%),
+      var(--cream);
+    background-attachment:fixed;
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+  .wrap{max-width:1240px;margin:0 auto;padding:0 22px}
+
+  /* ---------- Header ---------- */
+  header.hero{
+    position:relative;overflow:hidden;
+    background:linear-gradient(115deg,#FF5747 0%,#FF2D87 45%,#FF7A1A 100%);
+    color:#fff;border-radius:0 0 34px 34px;
+    box-shadow:var(--shadow);
+    padding:46px 22px 70px;
+    margin-bottom:-44px;
+  }
+  header.hero:before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 80% 120%, #ffffff33 0 18%, transparent 40%),
+               radial-gradient(circle at 10% 0%, #ffffff22 0 14%, transparent 36%);
+    mix-blend-mode:screen;
+  }
+  .hero-inner{max-width:1240px;margin:0 auto;position:relative}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .pill{
+    font:700 11px/1 'Space Mono',monospace;letter-spacing:.14em;text-transform:uppercase;
+    background:#ffffff26;border:1px solid #ffffff44;padding:7px 11px;border-radius:100px;
+    backdrop-filter:blur(4px);
+  }
+  header.hero h1{
+    font-family:'Fraunces',serif;font-weight:900;font-size:clamp(30px,5vw,54px);
+    line-height:1.02;letter-spacing:-.02em;max-width:18ch;text-wrap:balance;
+  }
+  header.hero p.sub{font-size:clamp(15px,1.6vw,18px);max-width:62ch;margin-top:14px;color:#fff;opacity:.94}
+
+  /* ---------- Cards / layout ---------- */
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:22px;align-items:start}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .card{
+    background:var(--paper);border-radius:24px;padding:24px;
+    box-shadow:var(--shadow);border:1px solid #2c1f3c0f;position:relative;
+  }
+  .card h2{font-family:'Fraunces',serif;font-weight:800;font-size:22px;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+  .card .eyebrow{font:700 11px/1 'Space Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--magenta);margin-bottom:6px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* ---------- Product type toggle ---------- */
+  .typewrap{margin:18px 0 6px}
+  .type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#2c1f3c0a;padding:6px;border-radius:16px}
+  .type-btn{
+    cursor:pointer;border:2px solid transparent;border-radius:12px;padding:13px 12px;text-align:left;
+    background:transparent;font-family:'Outfit';transition:.18s;
+  }
+  .type-btn .tt{font-weight:800;font-size:15px;display:flex;align-items:center;gap:7px}
+  .type-btn .td{font-size:12px;color:var(--ink-soft);margin-top:3px}
+  .type-btn.active{background:#fff;border-color:var(--magenta);box-shadow:0 8px 18px -12px var(--magenta)}
+  .type-btn[data-t="evergreen"].active{border-color:var(--emerald);box-shadow:0 8px 18px -12px var(--emerald)}
+  .req{color:var(--red);font-weight:800}
+
+  /* ---------- Form ---------- */
+  .field-group{margin-top:18px}
+  .field-group .gl{font:700 11px/1 'Space Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .f{display:flex;flex-direction:column;gap:5px}
+  .f.full{grid-column:1/-1}
+  .f label{font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+  .f input,.f select{
+    font-family:'Outfit';font-size:14px;font-weight:600;color:var(--ink);
+    background:#fff;border:1.5px solid #2c1f3c1f;border-radius:11px;padding:10px 11px;width:100%;transition:.15s;
+  }
+  .f input:focus,.f select:focus{outline:none;border-color:var(--coral);box-shadow:0 0 0 3px #ff574722}
+
+  /* ---------- Result panel ---------- */
+  .result-top{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .gauge{
+    --pct:0;--gc:var(--amber);
+    width:128px;height:128px;border-radius:50%;flex:0 0 auto;
+    background:conic-gradient(var(--gc) calc(var(--pct)*1%), #2c1f3c12 0);
+    display:grid;place-items:center;position:relative;transition:background .6s ease;
+  }
+  .gauge:after{content:"";position:absolute;inset:11px;background:var(--paper);border-radius:50%}
+  .gauge .gv{position:relative;text-align:center;font-family:'Fraunces',serif}
+  .gauge .gv b{display:block;font-size:34px;font-weight:900;line-height:1}
+  .gauge .gv span{font:700 10px/1 'Space Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+  .rec-block{flex:1 1 200px;min-width:200px}
+  .rec-cat{font-family:'Fraunces',serif;font-weight:900;font-size:26px;line-height:1.05;letter-spacing:-.01em}
+  .rec-md{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font:800 14px 'Outfit';color:#fff;padding:7px 14px;border-radius:100px}
+  .rec-note{font-size:13px;color:var(--ink-soft);margin-top:10px}
+
+  /* sub-score bars */
+  .scores{margin-top:22px;display:flex;flex-direction:column;gap:13px}
+  .sb{}
+  .sb .sbh{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:5px}
+  .sb .sbh .nm{font-weight:700}
+  .sb .sbh .wt{font:700 10.5px 'Space Mono',monospace;color:var(--ink-soft);letter-spacing:.06em}
+  .sb .sbh .vl{font:700 13px 'Space Mono',monospace}
+  .track{height:11px;background:#2c1f3c10;border-radius:100px;overflow:hidden}
+  .bar{height:100%;border-radius:100px;width:0;transition:width .6s cubic-bezier(.22,1,.36,1)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .chip{font:700 11.5px 'Outfit';padding:7px 11px;border-radius:9px;display:flex;align-items:center;gap:6px;background:#2c1f3c0a;border:1px solid #2c1f3c12}
+  .chip.warn{background:#FF3B5C14;border-color:#FF3B5C44;color:#c41f3f}
+  .chip.good{background:#12B88614;border-color:#12B88644;color:#0a8a5f}
+  .chip b{font-family:'Space Mono',monospace;font-weight:700}
+
+  .explain{margin-top:20px;background:linear-gradient(180deg,#FFF1E0,#FFF8F0);border:1px solid #FFB23E55;border-radius:16px;padding:16px 17px}
+  .explain .eyebrow{color:var(--orange)}
+  .explain p{font-size:13.5px;color:#3a2e44;margin-top:4px}
+  .explain p+p{margin-top:9px}
+  .explain .fin{font:700 12px 'Space Mono',monospace;color:var(--ink-soft);margin-top:11px}
+
+  /* ---------- Portfolio ---------- */
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:42px 0 16px;flex-wrap:wrap}
+  .section-head h2{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(24px,3vw,34px);letter-spacing:-.02em}
+  .section-head p{color:var(--ink-soft);font-size:14px;max-width:54ch}
+  .addbtn{
+    cursor:pointer;border:none;font-family:'Outfit';font-weight:800;font-size:14px;color:#fff;
+    background:linear-gradient(120deg,var(--magenta),var(--coral));padding:13px 20px;border-radius:13px;
+    box-shadow:0 12px 24px -12px var(--magenta);transition:.15s;
+  }
+  .addbtn:hover{transform:translateY(-2px)}
+  .addbtn:active{transform:translateY(0)}
+
+  .tablecard{background:var(--paper);border-radius:22px;box-shadow:var(--shadow);border:1px solid #2c1f3c0f;overflow:hidden}
+  .tscroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;min-width:920px}
+  thead th{
+    font:700 10.5px 'Space Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+    text-align:left;padding:15px 14px;background:#2c1f3c08;white-space:nowrap;border-bottom:1px solid var(--line);
+  }
+  tbody td{padding:14px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{transition:.12s}
+  tbody tr:hover{background:#FF57470a}
+  .sku-code{font:700 13px 'Space Mono',monospace}
+  .ttag{font:700 10px 'Space Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+  .ttag.seasonal{background:#FF2D8718;color:#c41f6f}
+  .ttag.evergreen{background:#12B88618;color:#0a8a5f}
+  .comp-pill{font-family:'Fraunces',serif;font-weight:900;font-size:18px}
+  .miniscores{font:700 11px 'Space Mono',monospace;color:var(--ink-soft);white-space:nowrap}
+  .cat-badge{font:800 11.5px 'Outfit';color:#fff;padding:5px 11px;border-radius:100px;display:inline-block;white-space:nowrap}
+  .reason-cell{font-size:12.5px;color:var(--ink-soft);max-width:280px;line-height:1.45}
+  .delx{cursor:pointer;border:none;background:#2c1f3c0c;color:var(--ink-soft);width:26px;height:26px;border-radius:8px;font-size:15px;line-height:1;transition:.15s}
+  .delx:hover{background:#FF3B5C;color:#fff}
+  .emptyrow td{text-align:center;color:var(--ink-soft);padding:34px;font-style:italic}
+
+  /* methodology */
+  details.method{margin-top:28px;background:var(--paper);border:1px solid #2c1f3c12;border-radius:18px;padding:4px 20px;box-shadow:var(--shadow)}
+  details.method summary{cursor:pointer;font-family:'Fraunces',serif;font-weight:800;font-size:18px;padding:16px 0;list-style:none;display:flex;align-items:center;gap:9px}
+  details.method summary::-webkit-details-marker{display:none}
+  details.method summary:before{content:"▸";color:var(--coral);transition:.2s;font-size:14px}
+  details.method[open] summary:before{transform:rotate(90deg)}
+  .method-body{padding-bottom:20px;font-size:13.5px;color:#3a2e44}
+  .method-body h4{font-family:'Outfit';font-weight:800;margin:16px 0 6px;color:var(--ink)}
+  .method-body code{font-family:'Space Mono';background:#2c1f3c0c;padding:2px 6px;border-radius:5px;font-size:12px}
+  .method-body ul{margin:6px 0 6px 18px}
+  .method-body li{margin:3px 0}
+  .wgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:620px){.wgrid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}}
+  .wbox{border:1px solid #2c1f3c14;border-radius:12px;padding:12px 14px}
+  .wbox b{display:block;margin-bottom:6px}
+
+  footer{text-align:center;color:var(--ink-soft);font-size:12px;margin-top:40px;padding:0 22px}
+
+  /* per-metric transparent calc */
+  .calc{font:600 11px/1.4 'Space Mono',monospace;color:var(--ink-soft);margin-top:6px;background:#2c1f3c08;border-radius:7px;padding:6px 9px}
+  .calc b{color:var(--ink)}
+
+  /* ---------- Unit economics ---------- */
+  .econ-card{margin-top:22px}
+  .channel-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:16px}
+  .switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;background:#2c1f3c08;padding:9px 13px;border-radius:13px;border:1.5px solid #2c1f3c14;transition:.15s}
+  .switch.on{border-color:var(--sky);background:#1FA9FF12}
+  .track-sw{width:42px;height:24px;border-radius:100px;background:#2c1f3c22;position:relative;transition:.2s;flex:0 0 auto}
+  .switch.on .track-sw{background:var(--sky)}
+  .knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 4px #0003}
+  .switch.on .knob{left:21px}
+  .switch .swl{font-weight:700;font-size:13.5px}
+  .switch .swsub{font-size:11.5px;color:var(--ink-soft)}
+  .md-ctrl{display:flex;align-items:center;gap:9px;margin-left:auto;flex-wrap:wrap}
+  .md-ctrl label{font:700 11px 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .md-ctrl input{width:74px;font-family:'Space Mono';font-weight:700;font-size:14px;text-align:center;border:1.5px solid #2c1f3c1f;border-radius:10px;padding:8px}
+  .md-ctrl input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px #ff7a1a22}
+  .resync{cursor:pointer;border:none;background:#FF7A1A18;color:#d4610a;font:700 11px 'Outfit';padding:8px 11px;border-radius:9px}
+  .resync:hover{background:#FF7A1A28}
+
+  .waterfall{margin-top:18px;border:1px solid #2c1f3c12;border-radius:16px;overflow:hidden}
+  .wf-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13.5px}
+  .wf-row:last-child{border-bottom:none}
+  .wf-row .lbl{font-weight:600}
+  .wf-row .lbl small{display:block;font-weight:500;font-size:11px;color:var(--ink-soft);font-family:'Space Mono'}
+  .wf-row .pp{font:700 13.5px 'Space Mono',monospace;text-align:right;white-space:nowrap}
+  .wf-row .tot{font:600 11.5px 'Space Mono',monospace;color:var(--ink-soft);text-align:right;white-space:nowrap;min-width:92px}
+  .wf-row.minus .pp{color:var(--red)}
+  .wf-row.sub{background:#2c1f3c06}
+  .wf-row.sub .pp{color:var(--ink)}
+  .wf-row.head{background:#2c1f3c0a;font:700 10.5px 'Space Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .wf-row.net{background:linear-gradient(90deg,#12B88612,#12B88604)}
+  .wf-row.net .lbl{font-family:'Fraunces';font-weight:900;font-size:16px}
+  .wf-row.net .pp{font-size:17px;font-weight:700}
+  .wf-row.net.loss{background:linear-gradient(90deg,#FF3B5C14,#FF3B5C04)}
+  .marginbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .mstat{flex:1 1 120px;background:#2c1f3c06;border-radius:13px;padding:13px 15px;border:1px solid #2c1f3c10}
+  .mstat .k{font:700 10px 'Space Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .mstat .v{font-family:'Fraunces';font-weight:900;font-size:24px;margin-top:3px}
+
+  .expense-add{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+  .expense-add input{font-family:'Outfit';font-size:14px;font-weight:600;border:1.5px solid #2c1f3c1f;border-radius:11px;padding:10px 12px;background:#fff}
+  .expense-add .en{flex:1 1 180px}
+  .expense-add .ev{width:120px}
+  .expense-add input:focus{outline:none;border-color:var(--magenta);box-shadow:0 0 0 3px #ff2d8722}
+  .expense-add button{cursor:pointer;border:none;background:var(--ink);color:#fff;font:800 14px 'Outfit';padding:0 18px;border-radius:11px}
+  .elist{display:flex;flex-direction:column;gap:7px;margin-top:11px}
+  .erow{display:flex;align-items:center;gap:10px;background:#FF2D8710;border:1px solid #FF2D8730;border-radius:10px;padding:8px 12px;font-size:13px}
+  .erow .enm{font-weight:600;flex:1}
+  .erow .eamt{font:700 13px 'Space Mono',monospace}
+  .erow button{cursor:pointer;border:none;background:transparent;color:var(--ink-soft);font-size:18px;line-height:1}
+  .erow button:hover{color:var(--red)}
+  .ehint{font-size:12px;color:var(--ink-soft);margin-top:9px;font-style:italic}
+
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .animate{animation:rise .6s both}
+  .d1{animation-delay:.05s}.d2{animation-delay:.13s}.d3{animation-delay:.21s}.d4{animation-delay:.29s}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="badge-row">
+      <span class="pill">Markdown Engine</span>
+      <span class="pill">B2B · Boys' Occasion Wear</span>
+      <span class="pill">Seasonal ⇄ Evergreen</span>
+    </div>
+    <h1>Should this SKU hold, mark down, or be liquidated?</h1>
+    <p class="sub">A weighted decision engine for occasion-wear inventory — built to protect long-term margin, not just clear shelves. Sell-through, seasonal timing, coverage and age combine into one score, with the model adapting automatically to whether a design is seasonal or evergreen.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- ============ INPUT ============ -->
+    <section class="card animate d1" id="inputCard">
+      <div class="eyebrow">Step 1 · SKU profile</div>
+      <h2><span class="dot" style="background:var(--coral)"></span>Inputs</h2>
+
+      <div class="typewrap">
+        <div class="gl">Product type <span class="req">— required ✱</span></div>
+        <div class="type-toggle" id="typeToggle">
+          <button class="type-btn active" data-t="seasonal">
+            <span class="tt"><span class="dot" style="background:var(--magenta)"></span>Seasonal</span>
+            <span class="td">Demand spikes in a window. Timing &gt; age.</span>
+          </button>
+          <button class="type-btn" data-t="evergreen">
+            <span class="tt"><span class="dot" style="background:var(--emerald)"></span>Evergreen</span>
+            <span class="td">Sells year-round. Coverage &amp; age matter more.</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="gl"><span class="dot" style="background:var(--sky)"></span>Identity &amp; inventory</div>
+        <div class="fields">
+          <div class="f full"><label>SKU code</label><input id="sku" value="SHRW-NAVY-04"></div>
+          <div class="f"><label>Current stock qty</label><input id="stock" type="number" value="240"></div>
+          <div class="f"><label>Original production qty</label><input id="prod" type="number" value="500"></div>
+          <div class="f"><label>Inventory age (days)</label><input id="age" type="number" value="150"></div>
+          <div class="f"><label>Current selling price (₹)</label><input id="price" type="number" value="1450"></div>
+          <div class="f"><label>Current profit / piece (₹)</label><input id="profit" type="number" value="430"></div>
+          <div class="f full"><label>Launch grace period (days) — no markdown before a fair selling window (first 90 days always protected)</label><input id="grace" type="number" value="90"></div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="gl"><span class="dot" style="background:var(--amber)"></span>Sales velocity</div>
+        <div class="fields">
+          <div class="f"><label>Units sold · last 30 days</label><input id="s30" type="number" value="55"></div>
+          <div class="f"><label>Units sold · last 90 days</label><input id="s90" type="number" value="180"></div>
+          <div class="f full"><label>Total units sold since launch</label><input id="stotal" type="number" value="260"></div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="gl"><span class="dot" style="background:var(--magenta)"></span>Seasonality</div>
+        <div class="fields">
+          <div class="f"><label>Season category</label>
+            <select id="season">
+              <option>Wedding</option><option>Festive / Diwali</option><option>Eid</option>
+              <option>Summer</option><option>Winter</option><option>Year-round</option>
+            </select>
+          </div>
+          <div class="f"><label>Seasonal windows passed</label>
+            <select id="windows">
+              <option value="0">0 — none yet</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3+</option>
+            </select>
+          </div>
+          <div class="f full"><label>Remaining seasonal opportunity</label>
+            <select id="rso">
+              <option value="5">5 — Entire major season still ahead</option>
+              <option value="4" selected>4 — Majority of season still ahead</option>
+              <option value="3">3 — Season currently active</option>
+              <option value="2">2 — Majority o
