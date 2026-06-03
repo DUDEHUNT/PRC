@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Decision Engine — Boys' Occasion Wear</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,800;9..144,900&family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF4E6;
+    --paper:#FFFDF9;
+    --ink:#241A33;
+    --ink-soft:#5C5168;
+    --coral:#FF5747;
+    --magenta:#FF2D87;
+    --amber:#FFB23E;
+    --lime:#84CC16;
+    --sky:#1FA9FF;
+    --emerald:#12B886;
+    --orange:#FF7A1A;
+    --red:#FF3B5C;
+    --line:#2c1f3c14;
+    --shadow:0 18px 40px -22px #4a2a6055;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Outfit',sans-serif;
+    background:
+      radial-gradient(circle at 12% -5%, #FFD9A833 0 40%, transparent 60%),
+      radial-gradient(circle at 95% 0%, #FF2D8722 0 35%, transparent 55%),
+      var(--cream);
+    background-attachment:fixed;
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+  .wrap{max-width:1240px;margin:0 auto;padding:0 22px}
+
+  /* ---------- Header ---------- */
+  header.hero{
+    position:relative;overflow:hidden;
+    background:linear-gradient(115deg,#FF5747 0%,#FF2D87 45%,#FF7A1A 100%);
+    color:#fff;border-radius:0 0 34px 34px;
+    box-shadow:var(--shadow);
+    padding:46px 22px 70px;
+    margin-bottom:-44px;
+  }
+  header.hero:before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 80% 120%, #ffffff33 0 18%, transparent 40%),
+               radial-gradient(circle at 10% 0%, #ffffff22 0 14%, transparent 36%);
+    mix-blend-mode:screen;
+  }
+  .hero-inner{max-width:1240px;margin:0 auto;position:relative}
+  .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .pill{
+    font:700 11px/1 'Space Mono',monospace;letter-spacing:.14em;text-transform:uppercase;
+    background:#ffffff26;border:1px solid #ffffff44;padding:7px 11px;border-radius:100px;
+    backdrop-filter:blur(4px);
+  }
+  header.hero h1{
+    font-family:'Fraunces',serif;font-weight:900;font-size:clamp(30px,5vw,54px);
+    line-height:1.02;letter-spacing:-.02em;max-width:18ch;text-wrap:balance;
+  }
+  header.hero p.sub{font-size:clamp(15px,1.6vw,18px);max-width:62ch;margin-top:14px;color:#fff;opacity:.94}
+
+  /* ---------- Cards / layout ---------- */
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:22px;align-items:start}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .card{
+    background:var(--paper);border-radius:24px;padding:24px;
+    box-shadow:var(--shadow);border:1px solid #2c1f3c0f;position:relative;
+  }
+  .card h2{font-family:'Fraunces',serif;font-weight:800;font-size:22px;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+  .card .eyebrow{font:700 11px/1 'Space Mono',monospace;letter-spacing:.16em;text-transform:uppercase;color:var(--magenta);margin-bottom:6px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+
+  /* ---------- Product type toggle ---------- */
+  .typewrap{margin:18px 0 6px}
+  .type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#2c1f3c0a;padding:6px;border-radius:16px}
+  .type-btn{
+    cursor:pointer;border:2px solid transparent;border-radius:12px;padding:13px 12px;text-align:left;
+    background:transparent;font-family:'Outfit';transition:.18s;
+  }
+  .type-btn .tt{font-weight:800;font-size:15px;display:flex;align-items:center;gap:7px}
+  .type-btn .td{font-size:12px;color:var(--ink-soft);margin-top:3px}
+  .type-btn.active{background:#fff;border-color:var(--magenta);box-shadow:0 8px 18px -12px var(--magenta)}
+  .type-btn[data-t="evergreen"].active{border-color:var(--emerald);box-shadow:0 8px 18px -12px var(--emerald)}
+  .req{color:var(--red);font-weight:800}
+
+  /* ---------- Form ---------- */
+  .field-group{margin-top:18px}
+  .field-group .gl{font:700 11px/1 'Space Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .f{display:flex;flex-direction:column;gap:5px}
+  .f.full{grid-column:1/-1}
+  .f label{font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+  .f input,.f select{
+    font-family:'Outfit';font-size:14px;font-weight:600;color:var(--ink);
+    background:#fff;border:1.5px solid #2c1f3c1f;border-radius:11px;padding:10px 11px;width:100%;transition:.15s;
+  }
+  .f input:focus,.f select:focus{outline:none;border-color:var(--coral);box-shadow:0 0 0 3px #ff574722}
+
+  /* ---------- Result panel ---------- */
+  .result-top{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .gauge{
+    --pct:0;--gc:var(--amber);
+    width:128px;height:128px;border-radius:50%;flex:0 0 auto;
+    background:conic-gradient(var(--gc) calc(var(--pct)*1%), #2c1f3c12 0);
+    display:grid;place-items:center;position:relative;transition:background .6s ease;
+  }
+  .gauge:after{content:"";position:absolute;inset:11px;background:var(--paper);border-radius:50%}
+  .gauge .gv{position:relative;text-align:center;font-family:'Fraunces',serif}
+  .gauge .gv b{display:block;font-size:34px;font-weight:900;line-height:1}
+  .gauge .gv span{font:700 10px/1 'Space Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+  .rec-block{flex:1 1 200px;min-width:200px}
+  .rec-cat{font-family:'Fraunces',serif;font-weight:900;font-size:26px;line-height:1.05;letter-spacing:-.01em}
+  .rec-md{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font:800 14px 'Outfit';color:#fff;padding:7px 14px;border-radius:100px}
+  .rec-note{font-size:13px;color:var(--ink-soft);margin-top:10px}
+
+  /* sub-score bars */
+  .scores{margin-top:22px;display:flex;flex-direction:column;gap:13px}
+  .sb{}
+  .sb .sbh{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin-bottom:5px}
+  .sb .sbh .nm{font-weight:700}
+  .sb .sbh .wt{font:700 10.5px 'Space Mono',monospace;color:var(--ink-soft);letter-spacing:.06em}
+  .sb .sbh .vl{font:700 13px 'Space Mono',monospace}
+  .track{height:11px;background:#2c1f3c10;border-radius:100px;overflow:hidden}
+  .bar{height:100%;border-radius:100px;width:0;transition:width .6s cubic-bezier(.22,1,.36,1)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .chip{font:700 11.5px 'Outfit';padding:7px 11px;border-radius:9px;display:flex;align-items:center;gap:6px;background:#2c1f3c0a;border:1px solid #2c1f3c12}
+  .chip.warn{background:#FF3B5C14;border-color:#FF3B5C44;color:#c41f3f}
+  .chip.good{background:#12B88614;border-color:#12B88644;color:#0a8a5f}
+  .chip b{font-family:'Space Mono',monospace;font-weight:700}
+
+  .explain{margin-top:20px;background:linear-gradient(180deg,#FFF1E0,#FFF8F0);border:1px solid #FFB23E55;border-radius:16px;padding:16px 17px}
+  .explain .eyebrow{color:var(--orange)}
+  .explain p{font-size:13.5px;color:#3a2e44;margin-top:4px}
+  .explain p+p{margin-top:9px}
+  .explain .fin{font:700 12px 'Space Mono',monospace;color:var(--ink-soft);margin-top:11px}
+
+  /* ---------- Portfolio ---------- */
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:42px 0 16px;flex-wrap:wrap}
+  .section-head h2{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(24px,3vw,34px);letter-spacing:-.02em}
+  .section-head p{color:var(--ink-soft);font-size:14px;max-width:54ch}
+  .addbtn{
+    cursor:pointer;border:none;font-family:'Outfit';font-weight:800;font-size:14px;color:#fff;
+    background:linear-gradient(120deg,var(--magenta),var(--coral));padding:13px 20px;border-radius:13px;
+    box-shadow:0 12px 24px -12px var(--magenta);transition:.15s;
+  }
+  .addbtn:hover{transform:translateY(-2px)}
+  .addbtn:active{transform:translateY(0)}
+
+  .tablecard{background:var(--paper);border-radius:22px;box-shadow:var(--shadow);border:1px solid #2c1f3c0f;overflow:hidden}
+  .tscroll{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;min-width:920px}
+  thead th{
+    font:700 10.5px 'Space Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+    text-align:left;padding:15px 14px;background:#2c1f3c08;white-space:nowrap;border-bottom:1px solid var(--line);
+  }
+  tbody td{padding:14px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{transition:.12s}
+  tbody tr:hover{background:#FF57470a}
+  .sku-code{font:700 13px 'Space Mono',monospace}
+  .ttag{font:700 10px 'Space Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+  .ttag.seasonal{background:#FF2D8718;color:#c41f6f}
+  .ttag.evergreen{background:#12B88618;color:#0a8a5f}
+  .comp-pill{font-family:'Fraunces',serif;font-weight:900;font-size:18px}
+  .miniscores{font:700 11px 'Space Mono',monospace;color:var(--ink-soft);white-space:nowrap}
+  .cat-badge{font:800 11.5px 'Outfit';color:#fff;padding:5px 11px;border-radius:100px;display:inline-block;white-space:nowrap}
+  .reason-cell{font-size:12.5px;color:var(--ink-soft);max-width:280px;line-height:1.45}
+  .delx{cursor:pointer;border:none;background:#2c1f3c0c;color:var(--ink-soft);width:26px;height:26px;border-radius:8px;font-size:15px;line-height:1;transition:.15s}
+  .delx:hover{background:#FF3B5C;color:#fff}
+  .emptyrow td{text-align:center;color:var(--ink-soft);padding:34px;font-style:italic}
+
+  /* methodology */
+  details.method{margin-top:28px;background:var(--paper);border:1px solid #2c1f3c12;border-radius:18px;padding:4px 20px;box-shadow:var(--shadow)}
+  details.method summary{cursor:pointer;font-family:'Fraunces',serif;font-weight:800;font-size:18px;padding:16px 0;list-style:none;display:flex;align-items:center;gap:9px}
+  details.method summary::-webkit-details-marker{display:none}
+  details.method summary:before{content:"▸";color:var(--coral);transition:.2s;font-size:14px}
+  details.method[open] summary:before{transform:rotate(90deg)}
+  .method-body{padding-bottom:20px;font-size:13.5px;color:#3a2e44}
+  .method-body h4{font-family:'Outfit';font-weight:800;margin:16px 0 6px;color:var(--ink)}
+  .method-body code{font-family:'Space Mono';background:#2c1f3c0c;padding:2px 6px;border-radius:5px;font-size:12px}
+  .method-body ul{margin:6px 0 6px 18px}
+  .method-body li{margin:3px 0}
+  .wgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:620px){.wgrid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}}
+  .wbox{border:1px solid #2c1f3c14;border-radius:12px;padding:12px 14px}
+  .wbox b{display:block;margin-bottom:6px}
+
+  footer{text-align:center;color:var(--ink-soft);font-size:12px;margin-top:40px;padding:0 22px}
+
+  /* per-metric transparent calc */
+  .calc{font:600 11px/1.4 'Space Mono',monospace;color:var(--ink-soft);margin-top:6px;background:#2c1f3c08;border-radius:7px;padding:6px 9px}
+  .calc b{color:var(--ink)}
+
+  /* audit contribution breakdown */
+  .auditrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px!important}
+  .auditrow span{font:600 11px 'Space Mono',monospace;background:#fff;border:1px solid #FFB23E66;border-radius:7px;padding:4px 8px;color:#7a531a}
+  .auditrow span.total{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700}
+
+  /* capital lock banner */
+  .lockbanner{margin-top:16px;background:#FF3B5C12;border:1.5px solid var(--red);border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:12px;color:#c41f3f}
+  .lockbanner .amt{font-family:'Fraunces';font-weight:900;font-size:20px;line-height:1.1;margin-top:2px}
+
+  /* ---------- Unit economics ---------- */
+  .econ-card{margin-top:22px}
+  .channel-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:16px}
+  .switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;background:#2c1f3c08;padding:9px 13px;border-radius:13px;border:1.5px solid #2c1f3c14;transition:.15s}
+  .switch.on{border-color:var(--sky);background:#1FA9FF12}
+  .track-sw{width:42px;height:24px;border-radius:100px;background:#2c1f3c22;position:relative;transition:.2s;flex:0 0 auto}
+  .switch.on .track-sw{background:var(--sky)}
+  .knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 2px 4px #0003}
+  .switch.on .knob{left:21px}
+  .switch .swl{font-weight:700;font-size:13.5px}
+  .switch .swsub{font-size:11.5px;color:var(--ink-soft)}
+  .md-ctrl{display:flex;align-items:center;gap:9px;margin-left:auto;flex-wrap:wrap}
+  .md-ctrl label{font:700 11px 'Space Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+  .md-ctrl input{width:74px;font-family:'Space Mono';font-weight:700;font-size:14px;text-align:center;border:1.5px solid #2c1f3c1f;border-radius:10px;padding:8px}
+  .md-ctrl input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 3px #ff7a1a22}
+  .resync{cursor:pointer;border:none;background:#FF7A1A18;color:#d4610a;font:700 11px 'Outfit';padding:8px 11px;border-radius:9px}
+  .resync:hover{background:#FF7A1A28}
+
+  .waterfall{margin-top:18px;border:1px solid #2c1f3c12;border-radius:16px;overflow:hidden}
+  .wf-row{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:baseline;padding:11px 15px;border-bottom:1px solid var(--line);font-size:13.5px}
+  .wf-row:last-child{border-bottom:none}
+  .wf-row .lbl{font-weight:600}
+  .wf-row .lbl small{display:block;font-weight:500;font-size:11px;color:var(--ink-soft);font-family:'Space Mono'}
+  .wf-row .pp{font:700 13.5px 'Space Mono',monospace;text-align:right;white-space:nowrap}
+  .wf-row .tot{font:600 11.5px 'Space Mono',monospace;color:var(--ink-soft);text-align:right;white-space:nowrap;min-width:92px}
+  .wf-row.minus .pp{color:var(--red)}
+  .wf-row.sub{background:#2c1f3c06}
+  .wf-row.sub .pp{color:var(--ink)}
+  .wf-row.head{background:#2c1f3c0a;font:700 10.5px 'Space Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .wf-row.net{background:linear-gradient(90deg,#12B88612,#12B88604)}
+  .wf-row.net .lbl{font-family:'Fraunces';font-weight:900;font-size:16px}
+  .wf-row.net .pp{font-size:17px;font-weight:700}
+  .wf-row.net.loss{background:linear-gradient(90deg,#FF3B5C14,#FF3B5C04)}
+  .marginbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .mstat{flex:1 1 120px;background:#2c1f3c06;border-radius:13px;padding:13px 15px;border:1px solid #2c1f3c10}
+  .mstat .k{font:700 10px 'Space Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .mstat .v{font-family:'Fraunces';font-weight:900;font-size:24px;margin-top:3px}
+
+  .expense-add{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+  .expense-add input{font-family:'Outfit';font-size:14px;font-weight:600;border:1.5px solid #2c1f3c1f;border-radius:11px;padding:10px 12px;background:#fff}
+  .expense-add .en{flex:1 1 180px}
+  .expense-add .ev{width:120px}
+  .expense-add input:focus{outline:none;border-color:var(--magenta);box-shadow:0 0 0 3px #ff2d8722}
+  .expense-add button{cursor:pointer;border:none;background:var(--ink);color:#fff;font:800 14px 'Outfit';padding:0 18px;border-radius:11px}
+  .elist{display:flex;flex-direction:column;gap:7px;margin-top:11px}
+  .erow{display:flex;align-items:center;gap:10px;background:#FF2D8710;border:1px solid #FF2D8730;border-radius:10px;padding:8px 12px;font-size:13px}
+  .erow .enm{font-weight:600;flex:1}
+  .erow .eamt{font:700 13px 'Space Mono',monospace}
+  .erow button{cursor:pointer;border:none;background:transparent;color:var(--ink-soft);font-size:18px;line-height:1}
+  .erow button:hover{color:var(--red)}
+  .ehint{font-size:12px;color:var(--ink-soft);margin-top:9px;font-style:italic}
+
+  @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .animate{animation:rise .6s both}
+  .d1{animation-delay:.05s}.d2{animation-delay:.13s}.d3{animation-delay:.21s}.d4{animation-delay:.29s}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="badge-row">
+      <span class="pill">Markdown Engine</span>
+      <span class="pill">B2B · Boys' Occasion Wear</span>
+      <span class="pill">Seasonal ⇄ Evergreen</span>
+    </div>
+    <h1>Should this SKU hold, mark down, or be liquidated?</h1>
+    <p class="sub">A weighted decision engine for occasion-wear inventory — built to protect long-term margin, not just clear shelves. Sell-through, seasonal timing, coverage and age combine into one score, with the model adapting automatically to whether a design is seasonal or evergreen.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- ============ INPUT ============ -->
+    <section class="card animate d1" id="inputCard">
+      <div class="eyebrow">Step 1 · SKU profile</div>
+      <h2><span class="dot" style="background:var(--coral)"></span>Inputs</h2>
+
+      <div class="typewrap">
+        <div class="gl">Product type <span class="req">— required ✱</span></div>
+        <div class="type-toggle" id="typeToggle">
+          <button class="type-btn active" data-t="seasonal">
+            <span class="tt"><span class="dot" style="background:var(--magenta)"></span>Seasonal</span>
+            <span class="td">Demand spikes in a window. Timing &gt; age.</span>
+          </button>
+          <button class="type-btn" data-t="evergreen">
+            <span class="tt"><span class="dot" style="background:var(--emerald)"></span>Evergreen</span>
+            <span class="td">Sells year-round. Coverage &amp; age matter more.</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="gl"><span class="dot" style="background:var(--sky)"></span>Identity &amp; inventory</div>
+        <div class="fields">
+          <div class="f full"><label>SKU code</label><input id="sku" value="SHRW-NAVY-04"></div>
+          <div class="f"><label>Current stock qty</label><input id="stock" type="number" value="240"></div>
+          <div class="f"><label>Original production qty</label><input id="prod" type="number" value="500"></div>
+          <div class="f"><label>Inventory age (days)</label><input id="age" type="number" value="150"></div>
+          <div class="f"><label>Current selling price (₹)</label><input id="price" type="number" value="1450"></div>
+          <div class="f"><label>Current profit / piece (₹)</label><input id="profit" type="number" value="430"></div>
+          <div class="f full"><label>Launch grace period (days) — no markdown before a fair selling window (first 90 days always protected)</label><input id="grace" type="number" value="90"></div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="gl"><span class="dot" style="background:var(--amber)"></span>Sales velocity</div>
+        <div class="fields">
+          <div class="f"><label>Units sold · last 30 days</label><input id="s30" type="number" value="55"></div>
+          <div class="f"><label>Units sold · last 90 days</label><input id="s90" type="number" value="180"></div>
+          <div class="f full"><label>Total units sold since launch</label><input id="stotal" type="number" value="260"></div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="gl"><span class="dot" style="background:var(--magenta)"></span>Seasonality</div>
+        <div class="fields">
+          <div class="f"><label>Season category</label>
+            <select id="season">
+              <option>Wedding</option><option>Festive / Diwali</option><option>Eid</option>
+              <option>Summer</option><option>Winter</option><option>Year-round</option>
+            </select>
+          </div>
+          <div class="f"><label>Seasonal windows passed</label>
+            <select id="windows">
+              <option value="0">0 — none yet</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3+</option>
+            </select>
+          </div>
+          <div class="f full"><label>Remaining seasonal opportunity</label>
+            <select id="rso">
+              <option value="5">5 — Entire major season still ahead</option>
+              <option value="4" selected>4 — Majority of season still ahead</option>
+              <option value="3">3 — Season currently active</option>
+              <option value="2">2 — Majority of season already passed</option>
+              <option value="1">1 — Season completely missed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="gl"><span class="dot" style="background:var(--lime)"></span>Finance &amp; capital</div>
+        <div class="fields">
+          <div class="f"><label>COGS / piece (₹)</label><input id="cogs" type="number" value="1020"></div>
+          <div class="f"><label>Annual financing rate (%)</label><input id="finrate" type="number" value="18"></div>
+          <div class="f full"><label>Average collection period (days) — how long until you're paid</label><input id="collection" type="number" value="150"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RESULT ============ -->
+    <section class="card animate d2" id="resultCard">
+      <div class="eyebrow" id="modelLabel">Seasonal model · live</div>
+      <h2><span class="dot" style="background:var(--emerald)"></span>Recommendation</h2>
+
+      <div class="result-top" style="margin-top:18px">
+        <div class="gauge" id="gauge"><div class="gv"><b id="compVal">—</b><span>/ 5.00</span></div></div>
+        <div class="rec-block">
+          <div class="rec-cat" id="recCat">—</div>
+          <div class="rec-md" id="recMd" style="background:var(--ink)">—</div>
+          <div class="rec-note" id="recNote"></div>
+        </div>
+      </div>
+
+      <div id="lockBanner" class="lockbanner" style="display:none"></div>
+
+      <div class="scores" id="scores"></div>
+
+      <div class="chips" id="chips"></div>
+
+      <div class="explain">
+        <div class="eyebrow">Why this call</div>
+        <div id="explainBody"></div>
+        <div class="fin" id="finLine"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ UNIT ECONOMICS ============ -->
+  <section class="card econ-card animate d4" id="econCard">
+    <div class="eyebrow" style="color:var(--orange)">Step 2 · Profit at the recommended price</div>
+    <h2><span class="dot" style="background:var(--orange)"></span>Unit economics</h2>
+
+    <div class="channel-row">
+      <div class="switch" id="channelSwitch" role="button" tabindex="0">
+        <div class="track-sw"><div class="knob"></div></div>
+        <div><div class="swl">Sold through wholesale</div><div class="swsub">Distributor takes 15% of selling price</div></div>
+      </div>
+      <div class="md-ctrl">
+        <label>Applied markdown</label>
+        <input id="appliedMd" type="number" step="0.5" value="0">
+        <span style="font-weight:800">%</span>
+        <button class="resync" id="resyncMd">↻ Use recommended</button>
+      </div>
+    </div>
+
+    <div class="waterfall" id="waterfall"></div>
+
+    <div class="marginbar" id="marginbar"></div>
+
+    <div class="expense-add">
+      <input class="en" id="expName" placeholder="Extra cost not in COGS (e.g. Packaging, Freight, Tag)">
+      <input class="ev" id="expAmt" type="number" placeholder="₹ / piece">
+      <button id="expAdd">＋ Add</button>
+    </div>
+    <div class="elist" id="elist"></div>
+    <div class="ehint" id="ehint">Add any per-piece costs the COGS figure leaves out — packaging, freight, labels, returns provision, platform fees. They feed straight into net profit below.</div>
+  </section>
+
+  <!-- ============ PORTFOLIO ============ -->
+  <div class="section-head">
+    <div>
+      <h2>Portfolio dashboard</h2>
+      <p>Every analysed SKU lands here, color-coded by action. Seeded with sample occasion-wear lines — add your own from the panel above.</p>
+    </div>
+    <button class="addbtn" id="addBtn">＋ Add current SKU</button>
+  </div>
+
+  <div class="tablecard animate d3">
+    <div class="tscroll">
+      <table>
+        <thead><tr>
+          <th>SKU</th><th>Type</th><th>Score</th>
+          <th>ST·Sea·Cov·Age·CPI·Cash·Fin</th><th>Flags</th>
+          <th>Markdown</th><th>Action</th><th>Reasoning</th><th></th>
+        </tr></thead>
+        <tbody id="portfolioBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ METHODOLOGY ============ -->
+  <details class="method">
+    <summary>How the engine decides</summary>
+    <div class="method-body">
+      <p>The engine optimises for <b>cash generation and capital productivity first</b>, with inventory clearance as the last resort. Seven metrics are each scored <code>1–5</code>, then blended with type-specific weights into a composite. Priority order: cash generation → capital productivity → demand quality → margin protection → clearance.</p>
+
+      <div class="wgrid">
+        <div class="wbox"><b style="color:var(--magenta)">Seasonal weights</b>
+          Sell-through 25% · Seasonal 25% · Capital productivity 15% · Cash velocity 10% · Coverage 10% · Age 10% · Financing 5%.<br>
+          <em style="color:var(--ink-soft);font-size:12.5px">Future seasonal demand still leads, but capital efficiency now counts.</em>
+        </div>
+        <div class="wbox"><b style="color:var(--emerald)">Evergreen weights</b>
+          Capital productivity 25% · Sell-through 20% · Coverage 20% · Cash velocity 15% · Age 10% · Seasonal 5% · Financing 5%.<br>
+          <em style="color:var(--ink-soft);font-size:12.5px">No season to wait for, so capital productivity dominates.</em>
+        </div>
+      </div>
+
+      <h4>The three capital metrics</h4>
+      <ul>
+        <li><b>Capital productivity (CPI)</b> = gross profit generated ÷ (COGS invested × age in years). Above 1.0 scores 5; below 0.25 scores 1. A SKU that converts its tied-up capital into profit quickly is protected from markdowns even if sell-through is slow.</li>
+        <li><b>Cash velocity</b> = profit per piece ÷ (age days + collection days). Rewards SKUs that return cash fast; ₹3+/day scores 5, under ₹0.6/day scores 1.</li>
+        <li><b>Financing pressure</b> = financing cost per piece ÷ profit per piece. Under 10% scores 5; over 50% scores 1. A profitable SKU that ties up capital too long is pulled down.</li>
+      </ul>
+
+      <h4>Margin-aware markdown ceiling</h4>
+      <p>Static discount tiers are gone. The <b>safe ceiling = (profit ÷ price) × 70%</b>, so a markdown can never wipe out the unit's profit. Small/Medium/Aggressive scale that ceiling at ⅓ / ⅔ / full. Coverage now uses <b>demand-weighted sales</b> (70% last-30-days, 30% last-90-day average) to react faster to shifts.</p>
+
+      <h4>Capital lock</h4>
+      <p>Flags any SKU over <b>270 days old with 4+ months of coverage</b> and shows the rupee value (stock × COGS) trapped in slow inventory.</p>
+
+      <h4>Overrides</h4>
+      <ul>
+        <li><b>Maturity gate (cold-start):</b> a SKU isn't discounted until it's had a fair selling window. Its first <b>90 days are always protected</b> (the freshest age tier), extendable via the launch grace period for long manufacture-to-shelf lags, and a seasonal piece is also protected while its major season is still ahead. In all these cases it shows a <b>“building read”</b> status instead of a markdown — low sell-through and high coverage on a freshly produced line are artifacts of newness, not weak demand. The gate only steps in when the engine would otherwise have discounted; a new SKU already selling well still reads as Maintain.</li>
+        <li><b>Seasonal fatigue:</b> if windows passed ≥ 2 <b>and</b> sell-through &lt; 50%, the composite is cut by a full point and the action is floored at <b>Medium markdown</b> — the market has seen the design too many times.</li>
+        <li><b>Age override (seasonal only):</b> if 0 windows have passed <b>and</b> the major season is still ahead, inventory age is set aside so an "old-but-pre-season" design isn't punished for calendar days.</li>
+      </ul>
+
+      <h4>Action bands (after overrides)</h4>
+      <ul>
+        <li><code>≥ 4.50</code> Maintain price · 0%</li>
+        <li><code>4.00–4.49</code> Monitor · 0%</li>
+        <li><code>3.00–3.99</code> Small markdown · ⅓ of safe ceiling</li>
+        <li><code>2.00–2.99</code> Medium markdown · ⅔ of safe ceiling</li>
+        <li><code>&lt; 2.00</code> Aggressive markdown · full safe ceiling · consider liquidation</li>
+      </ul>
+      <p style="margin-top:10px"><b>Roadmap:</b> the scoring core is isolated so later versions can plug in demand forecasting, probability-of-sale, region/retailer demand, dynamic markdown optimisation and auto seasonal classification without touching the UI.</p>
+    </div>
+  </details>
+
+  <footer>Decision-support tool · recommendations are advisory. Validate against live order pipeline before committing markdowns.</footer>
+</div>
+
+<script>
+/* ---------------- Scoring core (pure) ---------------- */
+const CAT = {
+  maintain:{label:'Maintain price', md:'No markdown', color:'#12B886', note:'Strong fundamentals — hold the line.'},
+  monitor :{label:'Monitor',        md:'No markdown yet', color:'#1FA9FF', note:'Healthy but watch the next 30 days.'},
+  small   :{label:'Small markdown',  md:'5%', color:'#FFB23E', note:'A nudge to keep velocity up.'},
+  medium  :{label:'Medium markdown', md:'10%', color:'#FF7A1A', note:'Demand is softening — act now.'},
+  aggr    :{label:'Aggressive markdown', md:'15–20%', color:'#FF3B5C', note:'Clear it. Consider liquidation.'},
+  hold    :{label:'Hold — building read', md:'No markdown — too new', color:'#7C6FFF', note:'No fair selling window yet. Low sell-through &amp; high coverage are expected, not warning signs.'}
+};
+
+function band(score){
+  if(score>=4.5) return 'maintain';
+  if(score>=4.0) return 'monitor';
+  if(score>=3.0) return 'small';
+  if(score>=2.0) return 'medium';
+  return 'aggr';
+}
+const ORDER=['maintain','monitor','small','medium','aggr'];
+function atLeast(cat,floor){ return ORDER.indexOf(cat) < ORDER.indexOf(floor) ? floor : cat; }
+
+function scoreSellThrough(r){ if(r>=.8)return 5; if(r>=.6)return 4; if(r>=.4)return 3; if(r>=.2)return 2; return 1; }
+function scoreCoverage(m){ if(m===Infinity)return 1; if(m<1)return 5; if(m<2)return 4; if(m<4)return 3; if(m<6)return 2; return 1; }
+function scoreAge(d){ if(d<90)return 5; if(d<180)return 4; if(d<270)return 3; if(d<365)return 2; return 1; }
+function scoreCPI(c){ if(c>1)return 5; if(c>=.75)return 4; if(c>=.5)return 3; if(c>=.25)return 2; return 1; }
+function scoreCash(v){ if(v>=3)return 5; if(v>=2)return 4; if(v>=1.2)return 3; if(v>=.6)return 2; return 1; }
+function scoreFin(r){ if(r<.10)return 5; if(r<.20)return 4; if(r<.35)return 3; if(r<.50)return 2; return 1; }
+
+// Margin-aware markdown: category scales the safe ceiling (ceiling = profit/price × 70%)
+function recommendedMarkdownPct(cat, ceilingPct){
+  if(cat==='small')  return ceilingPct*0.33;
+  if(cat==='medium') return ceilingPct*0.66;
+  if(cat==='aggr')   return ceilingPct*1.00;
+  return 0; // maintain / monitor / hold
+}
+
+function num(v){ const n=parseFloat(v); return isFinite(n)?n:0; }
+
+function compute(inp){
+  const type = inp.type;
+  const prod = Math.max(num(inp.prod),0);
+  const stock = Math.max(num(inp.stock),0);
+  const totalSold = Math.max(num(inp.stotal),0);
+  const s90 = Math.max(num(inp.s90),0);
+  const s30 = Math.max(num(inp.s30),0);
+  const age = Math.max(num(inp.age),0);
+  const windows = parseInt(inp.windows,10)||0;
+  const rso = parseInt(inp.rso,10)||3;
+  const cogs = Math.max(num(inp.cogs),0);
+  const finrate = Math.max(num(inp.finrate),0);
+  const grace = num(inp.grace)>0 ? num(inp.grace) : 90;
+  const profit = num(inp.profit);
+  const price = Math.max(num(inp.price),0);
+  const collection = num(inp.collection)>0 ? num(inp.collection) : 150;
+
+  // 1. Sell-through
+  const stRate = prod>0 ? totalSold/prod : 0;
+  const stScore = scoreSellThrough(stRate);
+
+  // 2. Seasonal timing (= remaining seasonal opportunity)
+  const seaScore = rso;
+
+  // 3. Coverage — demand-weighted (70% last-30d, 30% last-90d average) so it reacts faster
+  const weightedMonthly = s30*0.7 + (s90/3)*0.3;
+  const coverage = weightedMonthly>0 ? stock/weightedMonthly : (stock>0?Infinity:0);
+  const covScore = scoreCoverage(coverage);
+
+  // 4. Age
+  const ageScore = scoreAge(age);
+
+  // 5. Capital Productivity Index = gross profit generated / (COGS invested × age in years)
+  const grossGen = totalSold * profit;
+  const cogsInvested = prod * cogs;
+  const ageYears = Math.max(age,1)/365;
+  const cpi = cogsInvested>0 ? grossGen/(cogsInvested*ageYears) : 0;
+  const cpiScore = scoreCPI(cpi);
+
+  // 6. Cash velocity = profit per piece / (age days + collection days)  →  ₹ returned per day
+  const cashVel = (age+collection)>0 ? profit/(age+collection) : 0;
+  const cashScore = scoreCash(cashVel);
+
+  // 7. Financing pressure = financing cost per piece / profit per piece
+  const finCost = cogs*(finrate/100)*age/365;
+  const finRatio = profit>0 ? finCost/profit : Infinity;
+  const finScore = scoreFin(finRatio);
+
+  // Weights (sum to 1) — capital productivity & cash velocity now carry real weight
+  let w = type==='seasonal'
+    ? {st:.25, sea:.25, cov:.10, age:.10, cpi:.15, cash:.10, fin:.05}
+    : {st:.20, sea:.05, cov:.20, age:.10, cpi:.25, cash:.15, fin:.05};
+
+  // Age override (seasonal, pre-season): set age aside, fold its weight into seasonal timing
+  const ageOverride = type==='seasonal' && windows<1 && seaScore>=4;
+  if(ageOverride){ w = {...w, sea:w.sea+w.age, age:0}; }
+
+  const composite = w.st*stScore + w.sea*seaScore + w.cov*covScore + w.age*ageScore
+                  + w.cpi*cpiScore + w.cash*cashScore + w.fin*finScore;
+
+  // Seasonal fatigue: 2+ windows AND sell-through < 50% → −1 point + floor at Medium
+  const fatigue = windows>=2 && stRate<0.5;
+  let adjusted = Math.max(1, Math.min(5, composite - (fatigue?1:0)));
+
+  let cat = band(adjusted);
+  if(fatigue) cat = atLeast(cat,'medium');
+
+  // Maturity gate — don't discount a SKU that hasn't had a fair selling window yet
+  const preSeasonHold = type==='seasonal' && windows<1 && seaScore>=4;
+  const freshStock = ageScore>=5 || age<grace;
+  const buildingRead = preSeasonHold || freshStock;
+  let buildingReadApplied=false;
+  if(buildingRead && !fatigue && ORDER.indexOf(cat)>ORDER.indexOf('monitor')){ cat='hold'; buildingReadApplied=true; }
+
+  // Margin-aware markdown ceiling: never discount past 70% of the profit-to-price headroom
+  const maxSafe = price>0 ? profit/price : 0;
+  const ceiling = Math.max(0, maxSafe*0.7);
+  const ceilingPct = ceiling*100;
+  const recMdPct = recommendedMarkdownPct(cat, ceilingPct);
+
+  // Capital lock: old, slow-moving stock with real money tied up
+  const invValue = stock*cogs;
+  const capitalLocked = age>270 && (coverage===Infinity || coverage>4) && invValue>0;
+
+  // Contributions for the audit breakdown
+  const contribs = [
+    {k:'Sell-through', w:w.st, s:stScore},
+    {k:'Seasonal timing', w:w.sea, s:seaScore},
+    {k:'Inventory coverage', w:w.cov, s:covScore},
+    {k:'Inventory age', w:w.age, s:ageScore},
+    {k:'Capital productivity', w:w.cpi, s:cpiScore},
+    {k:'Cash velocity', w:w.cash, s:cashScore},
+    {k:'Financing pressure', w:w.fin, s:finScore},
+  ].map(o=>({...o, c:o.w*o.s}));
+
+  return {type,stRate,stScore,seaScore,covScore,ageScore,
+          cpi,cpiScore,cashVel,cashScore,finRatio,finScore,finCost,
+          weightedMonthly,coverage,weights:w,composite,adjusted,cat,
+          fatigue,ageOverride,contribs,windows,rso,age,stock,
+          prod,totalSold,s90,s30,cogs,finrate,profit,price,collection,grossGen,cogsInvested,ageYears,
+          maxSafe,ceiling,ceilingPct,recMdPct,invValue,capitalLocked,
+          grace,preSeasonHold,freshStock,buildingRead,buildingReadApplied};
+}
+
+/* ---------------- Explanation engine ---------------- */
+function explain(R, skuName){
+  const pct = (R.stRate*100).toFixed(0);
+  const covTxt = R.coverage===Infinity ? 'unlimited (no recent sales)' : R.coverage.toFixed(1)+' months';
+  const top = [...R.contribs].sort((a,b)=>b.c-a.c)[0];
+  const weak = [...R.contribs].filter(c=>c.w>0).sort((a,b)=>a.s-b.s)[0];
+
+  const p1 = `<p><b>${skuName||'This SKU'}</b> is scored on the <b>${R.type}</b> model across <b>seven factors</b>. `+
+    `Sell-through <b>${pct}%</b> (${R.stScore}/5), capital productivity <b>${R.cpi.toFixed(2)}</b> (${R.cpiScore}/5), `+
+    `cash velocity <b>₹${R.cashVel.toFixed(2)}/day</b> (${R.cashScore}/5), financing pressure <b>${R.finRatio===Infinity?'∞':(R.finRatio*100).toFixed(0)+'%'}</b> (${R.finScore}/5), `+
+    `coverage <b>${covTxt}</b> (${R.covScore}/5), age <b>${R.age}d</b> (${R.ageScore}/5), seasonal timing ${R.seaScore}/5. `+
+    `Weighted, these blend to a composite of <b>${R.composite.toFixed(2)}</b>.</p>`;
+
+  // auditable contribution chips
+  const audit = `<p class="auditrow">`+ R.contribs.map(c=>{
+      const nm = c.k.replace('Inventory ','').replace('Capital ','Cap ').replace('Seasonal timing','Seasonal');
+      return `<span${c.w===0?' style="opacity:.5"':''}>${nm} ${c.s}×${(c.w*100).toFixed(0)}% = ${c.c.toFixed(2)}</span>`;
+    }).join('') + `<span class="total">Σ = ${R.composite.toFixed(2)}</span></p>`;
+
+  const driver = `<p>The biggest positive driver was <b>${top.k.toLowerCase()}</b> (${(top.w*100).toFixed(0)}% × ${top.s}/5). `+
+    (weak && weak.s<=2 ? `The main drag was <b>${weak.k.toLowerCase()}</b> at ${weak.s}/5. ` : `No single factor was a serious weakness. `);
+
+  let seaTxt;
+  if(R.type==='evergreen'){
+    seaTxt = `Seasonality carries only ${(R.weights.sea*100).toFixed(0)}% here, so capital productivity and cash velocity dominate the call. `;
+  } else if(R.seaScore>=4){
+    seaTxt = `Favourable seasonal timing (${R.seaScore}/5) pulled toward a <b>softer</b> markdown — real demand is still ahead. `;
+  } else if(R.seaScore<=2){
+    seaTxt = `Weak seasonal timing (${R.seaScore}/5) pushed toward a <b>deeper</b> markdown — the window is closing or missed. `;
+  } else { seaTxt = `Seasonal timing is neutral (${R.seaScore}/5). `; }
+
+  // capital-productivity philosophy note
+  let capTxt='';
+  if(R.cpiScore>=4 && R.stScore<=2){ capTxt=`Despite slow sell-through, <b>capital productivity is strong</b> (${R.cpi.toFixed(2)}), so the engine protects it from an aggressive discount. `; }
+  else if(R.cpiScore<=2 && R.stScore>=4){ capTxt=`Sell-through looks healthy but <b>capital productivity is weak</b> (${R.cpi.toFixed(2)}) and capital is tied up, so it's nudged toward a markdown sooner. `; }
+  else if(R.finScore<=2){ capTxt=`<b>Financing pressure is high</b> — interest is eating ${(R.finRatio*100).toFixed(0)}% of the unit's profit, which weighed the score down. `; }
+
+  const p2full = `<p>${driver.slice(3)}${seaTxt}${capTxt}`+
+    (R.ageOverride? `Because no season has passed and the major window is still ahead, the <b>age override</b> set inventory age aside. ` : ``)+
+    (R.buildingReadApplied? `<b>Maturity gate:</b> this SKU hasn't had a fair selling window yet (${R.preSeasonHold?'its major season is still ahead':"it is only "+R.age+" days old"}), so low sell-through and high coverage are expected for a new line — any markdown is held until there's a genuine read. ` : ``)+
+    (R.fatigue? `<b>Seasonal fatigue fired</b> (2+ windows seen, sell-through under 50%): the composite was cut a full point and the action floored at Medium — the market has seen this design too often. ` : ``)+
+    `</p>`;
+
+  const C=CAT[R.cat];
+  const mdTxt = R.recMdPct>0 ? `<b style="color:${C.color}">${C.label} · ${R.recMdPct.toFixed(1)}% markdown</b>` : `<b style="color:${C.color}">${C.label}</b>`;
+  let ceilTxt = R.price>0
+    ? ` The <b>safe markdown ceiling is ${R.ceilingPct.toFixed(1)}%</b> (70% of the ₹${R.profit}/₹${R.price} profit-to-price headroom)${R.ceilingPct<=0?` — there is no margin room, any discount sells at a loss`:` — recommendations never exceed it`}.`
+    : ``;
+  const lockTxt = R.capitalLocked ? ` <b style="color:#c41f3f">⚠ Capital locked:</b> ${rupee0(R.invValue)} is tied up in stock that's ${R.age} days old with ${covTxt} of coverage.` : ``;
+  const p3 = `<p>Final call: ${mdTxt} — composite <b>${R.adjusted.toFixed(2)}/5</b>. ${C.note}${ceilTxt}${lockTxt}</p>`;
+
+  return p1+audit+p2full+p3;
+}
+
+/* ---------------- Short reasoning (table) ---------------- */
+function shortReason(R, sku){
+  const pct=(R.stRate*100).toFixed(0);
+  const cov = R.coverage===Infinity?'>6':R.coverage.toFixed(1);
+  let bits=[`${pct}% sell-through`];
+  if(R.windows>=1) bits.push(`${R.windows>=3?'3+':R.windows} season${R.windows>1?'s':''} seen`);
+  bits.push(`${cov} mo cover`);
+  let s = bits.join(', ')+'. ';
+  if(R.fatigue) s+='Fatigue penalty applied. ';
+  else if(R.buildingReadApplied) s+=(R.preSeasonHold?'Season still ahead — too early to judge. ':'Just produced — too new to judge. ');
+  else if(R.ageOverride) s+='Pre-season — age ignored. ';
+  if(R.capitalLocked) s+='Capital locked. ';
+  s+=`→ ${CAT[R.cat].label}${R.recMdPct>0?' '+R.recMdPct.toFixed(0)+'%':''}.`;
+  return s;
+}
+
+/* ---------------- Transparent per-metric calculations ---------------- */
+const ST_BAND={5:'≥80% → 5',4:'60–80% → 4',3:'40–60% → 3',2:'20–40% → 2',1:'<20% → 1'};
+const COV_BAND={5:'<1 mo → 5',4:'1–2 mo → 4',3:'2–4 mo → 3',2:'4–6 mo → 2',1:'≥6 mo → 1'};
+const AGE_BAND={5:'<90d → 5',4:'90–180d → 4',3:'180–270d → 3',2:'270–365d → 2',1:'≥365d → 1'};
+const RSO_TXT={5:'Entire season ahead',4:'Majority ahead',3:'Season active',2:'Majority passed',1:'Season missed'};
+const CPI_BAND={5:'>1.0 → 5',4:'0.75–1.0 → 4',3:'0.50–0.75 → 3',2:'0.25–0.50 → 2',1:'<0.25 → 1'};
+const CASH_BAND={5:'≥₹3/d → 5',4:'₹2–3/d → 4',3:'₹1.2–2/d → 3',2:'₹0.6–1.2/d → 2',1:'<₹0.6/d → 1'};
+const FIN_BAND={5:'<10% → 5',4:'10–20% → 4',3:'20–35% → 3',2:'35–50% → 2',1:'≥50% → 1'};
+
+function metricCalcs(R){
+  const stPct=(R.stRate*100).toFixed(0);
+  const st=`<b>${R.totalSold}</b> sold ÷ <b>${R.prod}</b> produced = <b>${stPct}%</b> &nbsp;|&nbsp; band ${ST_BAND[R.stScore]}`;
+
+  const sea=`Remaining opportunity: <b>"${RSO_TXT[R.seaScore]}"</b> → score <b>${R.seaScore}</b>`
+    + (R.ageOverride?` &nbsp;|&nbsp; <b>+age weight folded in</b> (age override)`:``);
+
+  const covTxt = R.coverage===Infinity?'∞ (no recent sales)':R.coverage.toFixed(1)+' mo';
+  const wm=R.weightedMonthly>0?R.weightedMonthly.toFixed(1):'0';
+  const cov=`weighted demand = (30d ${R.s30}×0.7)+(90d ${R.s90}÷3×0.3) = <b>${wm}/mo</b> &nbsp;|&nbsp; <b>${R.stock}</b> ÷ ${wm} = <b>${covTxt}</b> &nbsp;|&nbsp; band ${COV_BAND[R.covScore]}`;
+
+  const age=`<b>${R.age}</b> days on shelf &nbsp;|&nbsp; band ${AGE_BAND[R.ageScore]}`
+    + (R.ageOverride?` &nbsp;|&nbsp; <b>set aside</b> (pre-season)`:``);
+
+  const cpi=`gross profit (${R.totalSold}×₹${R.profit}=${rupee0(R.grossGen)}) ÷ (COGS invested ${rupee0(R.cogsInvested)} × ${R.ageYears.toFixed(2)} yr) = <b>${R.cpi.toFixed(2)}</b> &nbsp;|&nbsp; band ${CPI_BAND[R.cpiScore]}`;
+
+  const cash=`₹${R.profit} profit ÷ (${R.age}d age + ${R.collection}d collection) = <b>₹${R.cashVel.toFixed(2)}/day</b> &nbsp;|&nbsp; band ${CASH_BAND[R.cashScore]}`;
+
+  const finr = R.finRatio===Infinity?'∞ (no profit)':(R.finRatio*100).toFixed(0)+'%';
+  const fin=`financing ${rupee(R.finCost)}/pc ÷ ₹${R.profit} profit = <b>${finr}</b> &nbsp;|&nbsp; band ${FIN_BAND[R.finScore]}`;
+
+  return {st,sea,cov,age,cpi,cash,fin};
+}
+
+/* ---------------- Live UI ---------------- */
+const $=id=>document.getElementById(id);
+let curType='seasonal';
+const SCORE_COLORS=['#FF3B5C','#FF7A1A','#FFB23E','#84CC16','#12B886']; // 1..5
+
+function readInputs(){
+  return {
+    type:curType,
+    sku:$('sku').value.trim(),
+    stock:$('stock').value, prod:$('prod').value, age:$('age').value,
+    price:$('price').value, profit:$('profit').value, grace:$('grace').value,
+    s30:$('s30').value, s90:$('s90').value, stotal:$('stotal').value,
+    season:$('season').value, windows:$('windows').value, rso:$('rso').value,
+    cogs:$('cogs').value, finrate:$('finrate').value, collection:$('collection').value
+  };
+}
+
+function renderLive(){
+  const inp=readInputs();
+  const R=compute(inp);
+  const C=CAT[R.cat];
+
+  // gauge
+  const g=$('gauge');
+  g.style.setProperty('--pct', (R.adjusted/5*100).toFixed(1));
+  g.style.setProperty('--gc', C.color);
+  $('compVal').textContent=R.adjusted.toFixed(2);
+
+  $('recCat').textContent=C.label;
+  $('recCat').style.color=C.color;
+  const md=$('recMd');
+  md.textContent = R.recMdPct>0 ? 'Suggested markdown: '+R.recMdPct.toFixed(1)+'%' : C.md;
+  md.style.background=C.color;
+  $('recNote').textContent = C.note + (R.price>0 ? '  ·  Safe markdown ceiling: '+R.ceilingPct.toFixed(1)+'%' : '');
+  $('modelLabel').textContent=(R.type==='seasonal'?'Seasonal':'Evergreen')+' model · live';
+  $('modelLabel').style.color=R.type==='seasonal'?'var(--magenta)':'var(--emerald)';
+
+  // capital lock banner
+  const lb=$('lockBanner');
+  if(R.capitalLocked){
+    lb.style.display='flex';
+    lb.innerHTML=`<span style="font-size:22px">🔒</span><div><div style="font:700 12px 'Space Mono';letter-spacing:.1em;text-transform:uppercase">Capital locked</div><div class="amt">${rupee0(R.invValue)} trapped in slow inventory</div></div>`;
+  } else { lb.style.display='none'; }
+
+  // sub-score bars (7 metrics, transparent calc under each)
+  const mc=metricCalcs(R);
+  const defs=[
+    {nm:'Sell-through', s:R.stScore, w:R.weights.st, calc:mc.st},
+    {nm:'Seasonal timing', s:R.seaScore, w:R.weights.sea, calc:mc.sea},
+    {nm:'Inventory coverage', s:R.covScore, w:R.weights.cov, calc:mc.cov},
+    {nm:'Inventory age', s:R.ageScore, w:R.weights.age, calc:mc.age},
+    {nm:'Capital productivity', s:R.cpiScore, w:R.weights.cpi, calc:mc.cpi},
+    {nm:'Cash velocity', s:R.cashScore, w:R.weights.cash, calc:mc.cash},
+    {nm:'Financing pressure', s:R.finScore, w:R.weights.fin, calc:mc.fin},
+  ];
+  $('scores').innerHTML=defs.map(d=>`
+    <div class="sb">
+      <div class="sbh">
+        <span class="nm">${d.nm} <span class="wt">· ${(d.w*100).toFixed(0)}% wt${d.w===0?' (overridden)':''}</span></span>
+        <span class="vl" style="color:${SCORE_COLORS[d.s-1]}">${d.s}/5</span>
+      </div>
+      <div class="track"><div class="bar" style="width:${d.s/5*100}%;background:${SCORE_COLORS[d.s-1]}"></div></div>
+      <div class="calc">${d.calc}</div>
+    </div>`).join('');
+
+  // chips
+  let chips='';
+  chips+=`<span class="chip"><span class="dot" style="background:${R.type==='seasonal'?'var(--magenta)':'var(--emerald)'}"></span>${R.type==='seasonal'?'Seasonal':'Evergreen'}</span>`;
+  chips+=`<span class="chip">Windows passed <b>${R.windows>=3?'3+':R.windows}</b></span>`;
+  chips+=`<span class="chip">CPI <b>${R.cpi.toFixed(2)}</b></span>`;
+  chips+=`<span class="chip">Cash <b>₹${R.cashVel.toFixed(2)}/d</b></span>`;
+  chips+= R.fatigue
+    ? `<span class="chip warn">⚠ Seasonal fatigue · −1 applied</span>`
+    : `<span class="chip good">✓ No fatigue penalty</span>`;
+  if(R.ageOverride) chips+=`<span class="chip good">✓ Age override active</span>`;
+  if(R.buildingReadApplied) chips+=`<span class="chip" style="background:#7C6FFF18;border-color:#7C6FFF55;color:#5a4fd6">🛡 Maturity gate · markdown held</span>`;
+  if(R.capitalLocked) chips+=`<span class="chip warn">🔒 Capital locked · ${rupee0(R.invValue)}</span>`;
+  $('chips').innerHTML=chips;
+
+  // explanation + finance
+  $('explainBody').innerHTML=explain(R, inp.sku);
+  $('finLine').textContent=`Financing cost / piece ≈ ₹${R.finCost.toFixed(2)}  ·  context only, excluded from score`;
+
+  renderEcon(R, inp);
+}
+
+/* type toggle */
+$('typeToggle').addEventListener('click',e=>{
+  const b=e.target.closest('.type-btn'); if(!b)return;
+  curType=b.dataset.t;
+  document.querySelectorAll('.type-btn').forEach(x=>x.classList.toggle('active',x===b));
+  renderLive();
+});
+document.querySelectorAll('#inputCard input, #inputCard select').forEach(el=>{
+  el.addEventListener('input',renderLive);
+  el.addEventListener('change',renderLive);
+});
+
+/* ---------------- Unit economics ---------------- */
+const DIST_MARGIN = 0.15;          // distributor share when sold through wholesale
+let wholesale = false;             // channel toggle
+let mdAuto = true;                 // applied markdown follows the recommendation
+let expenses = [];                 // [{name, amt}] extra per-piece costs
+
+const rupee = n => '₹'+ (Math.round(n*100)/100).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const rupee0 = n => '₹'+ Math.round(n).toLocaleString('en-IN');
+
+function renderEcon(R, inp){
+  const listPrice = num(inp.price);
+  const cogs = R.cogs;
+  const finCost = R.finCost;
+  const stock = R.stock;
+
+  // applied markdown — defaults to the margin-aware recommended %
+  if(mdAuto){ $('appliedMd').value = R.recMdPct.toFixed(1); }
+  const mdPct = Math.max(0, Math.min(90, num($('appliedMd').value)));
+
+  const mdAmt   = listPrice * mdPct/100;
+  const newPrice= listPrice - mdAmt;
+  const distAmt = wholesale ? newPrice * DIST_MARGIN : 0;
+  const netRev  = newPrice - distAmt;
+  const expTotal= expenses.reduce((a,e)=>a+e.amt,0);
+  const grossProfit = netRev - cogs;
+  const netProfit   = grossProfit - finCost - expTotal;
+  const netMarginPct= newPrice>0 ? netProfit/newPrice*100 : 0;
+  const grossMarginPct = newPrice>0 ? grossProfit/newPrice*100 : 0;
+
+  // channel switch visual
+  $('channelSwitch').classList.toggle('on', wholesale);
+
+  const T = v => `<span class="tot">× ${stock} = ${rupee0(v*stock)}</span>`;
+  const rows = [];
+  rows.push(`<div class="wf-row head"><span class="lbl">Line item</span><span class="pp">Per piece</span><span class="tot">Across ${stock} in stock</span></div>`);
+  rows.push(`<div class="wf-row"><span class="lbl">List selling price</span><span class="pp">${rupee(listPrice)}</span>${T(listPrice)}</div>`);
+  rows.push(`<div class="wf-row minus"><span class="lbl">Markdown applied <small>${mdPct}%${mdAuto?' · recommended':' · manual'}</small></span><span class="pp">−${rupee(mdAmt)}</span><span class="tot">−${rupee0(mdAmt*stock)}</span></div>`);
+  rows.push(`<div class="wf-row sub"><span class="lbl">New selling price</span><span class="pp">${rupee(newPrice)}</span>${T(newPrice)}</div>`);
+  if(wholesale){
+    rows.push(`<div class="wf-row minus"><span class="lbl">Distribution margin <small>15% of new price → distributor</small></span><span class="pp">−${rupee(distAmt)}</span><span class="tot">−${rupee0(distAmt*stock)}</span></div>`);
+    rows.push(`<div class="wf-row sub"><span class="lbl">Net revenue to you</span><span class="pp">${rupee(netRev)}</span>${T(netRev)}</div>`);
+  }
+  rows.push(`<div class="wf-row minus"><span class="lbl">COGS / piece</span><span class="pp">−${rupee(cogs)}</span><span class="tot">−${rupee0(cogs*stock)}</span></div>`);
+  rows.push(`<div class="wf-row sub"><span class="lbl">Gross profit <small>${grossMarginPct.toFixed(1)}% of new price</small></span><span class="pp" style="color:${grossProfit>=0?'#0a8a5f':'var(--red)'}">${rupee(grossProfit)}</span>${T(grossProfit)}</div>`);
+  rows.push(`<div class="wf-row minus"><span class="lbl">Financing cost / piece <small>COGS × ${R.finrate}% × ${R.age}/365</small></span><span class="pp">−${rupee(finCost)}</span><span class="tot">−${rupee0(finCost*stock)}</span></div>`);
+  if(expTotal>0){
+    rows.push(`<div class="wf-row minus"><span class="lbl">Additional expenses <small>${expenses.length} line${expenses.length>1?'s':''}</small></span><span class="pp">−${rupee(expTotal)}</span><span class="tot">−${rupee0(expTotal*stock)}</span></div>`);
+  }
+  const loss = netProfit<0;
+  rows.push(`<div class="wf-row net ${loss?'loss':''}"><span class="lbl">Net profit / piece</span><span class="pp" style="color:${loss?'var(--red)':'#0a8a5f'}">${rupee(netProfit)}</span><span class="tot" style="color:${loss?'var(--red)':'#0a8a5f'};font-weight:700">${rupee0(netProfit*stock)} total</span></div>`);
+  $('waterfall').innerHTML = rows.join('');
+
+  // margin stat cards
+  $('marginbar').innerHTML = `
+    <div class="mstat"><div class="k">New price</div><div class="v">${rupee0(newPrice)}</div></div>
+    <div class="mstat"><div class="k">Net / piece</div><div class="v" style="color:${loss?'var(--red)':'var(--ink)'}">${rupee0(netProfit)}</div></div>
+    <div class="mstat"><div class="k">Net margin</div><div class="v" style="color:${netMarginPct<0?'var(--red)':netMarginPct<10?'var(--orange)':'#0a8a5f'}">${netMarginPct.toFixed(1)}%</div></div>
+    <div class="mstat"><div class="k">Net on full stock</div><div class="v" style="color:${loss?'var(--red)':'var(--ink)'}">${rupee0(netProfit*stock)}</div></div>`;
+
+  $('ehint').style.display = expenses.length? 'none':'block';
+}
+
+/* expense list render */
+function renderExpenses(){
+  $('elist').innerHTML = expenses.map((e,i)=>`
+    <div class="erow"><span class="enm">${e.name}</span><span class="eamt">${rupee(e.amt)}/pc</span><button data-i="${i}">×</button></div>`).join('');
+  $('elist').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    expenses.splice(+b.dataset.i,1); renderExpenses(); renderLive();
+  }));
+}
+
+/* econ controls */
+$('channelSwitch').addEventListener('click',()=>{ wholesale=!wholesale; renderLive(); });
+$('channelSwitch').addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();wholesale=!wholesale;renderLive();} });
+$('appliedMd').addEventListener('input',()=>{ mdAuto=false; renderLive(); });
+$('resyncMd').addEventListener('click',()=>{ mdAuto=true; renderLive(); });
+$('expAdd').addEventListener('click',()=>{
+  const amt=num($('expAmt').value);
+  if(amt<=0){ const f=$('expAmt'); f.style.borderColor='var(--red)'; f.focus(); setTimeout(()=>f.style.borderColor='',900); return; }
+  const name=$('expName').value.trim() || 'Additional cost';
+  expenses.push({name, amt});
+  $('expName').value=''; $('expAmt').value='';
+  renderExpenses(); renderLive();
+});
+$('expAmt').addEventListener('keydown',e=>{ if(e.key==='Enter') $('expAdd').click(); });
+
+/* ---------------- Portfolio ---------------- */
+let portfolio=[];
+function renderPortfolio(){
+  const body=$('portfolioBody');
+  if(!portfolio.length){
+    body.innerHTML=`<tr class="emptyrow"><td colspan="9">No SKUs yet — analyse one above and hit “Add current SKU”.</td></tr>`;
+    return;
+  }
+  body.innerHTML=portfolio.map((row,i)=>{
+    const R=row.R, C=CAT[R.cat];
+    const ms=`${R.stScore}·${R.seaScore}·${R.covScore}·${R.ageScore}·${R.cpiScore}·${R.cashScore}·${R.finScore}`;
+    let flags='';
+    if(R.fatigue) flags+='<span class="ttag seasonal" style="background:#FF3B5C18;color:#c41f3f">FATIGUE</span> ';
+    if(R.capitalLocked) flags+='<span class="ttag" style="background:#FF3B5C18;color:#c41f3f">🔒 LOCKED</span> ';
+    if(R.buildingReadApplied) flags+='<span class="ttag" style="background:#7C6FFF18;color:#5a4fd6">NEW · HELD</span> ';
+    if(R.ageOverride) flags+='<span class="ttag evergreen">AGE OVR</span>';
+    if(!flags) flags='<span style="color:#bbb">—</span>';
+    return `<tr>
+      <td><span class="sku-code">${row.sku||'(unnamed)'}</span></td>
+      <td><span class="ttag ${R.type}">${R.type}</span></td>
+      <td><span class="comp-pill" style="color:${C.color}">${R.adjusted.toFixed(2)}</span></td>
+      <td><span class="miniscores">${ms}</span></td>
+      <td>${flags}</td>
+      <td><span style="font-family:'Space Mono';font-weight:700">${R.recMdPct>0?R.recMdPct.toFixed(1)+'%':'—'}</span></td>
+      <td><span class="cat-badge" style="background:${C.color}">${C.label}</span></td>
+      <td class="reason-cell">${shortReason(R,row.sku)}</td>
+      <td><button class="delx" data-i="${i}">×</button></td>
+    </tr>`;
+  }).join('');
+  body.querySelectorAll('.delx').forEach(b=>b.addEventListener('click',()=>{
+    portfolio.splice(+b.dataset.i,1); renderPortfolio();
+  }));
+}
+
+$('addBtn').addEventListener('click',()=>{
+  const inp=readInputs();
+  portfolio.unshift({sku:inp.sku, R:compute(inp)});
+  renderPortfolio();
+  document.querySelector('.tablecard').scrollIntoView({behavior:'smooth',block:'center'});
+});
+
+/* ---------------- Seed examples ---------------- */
+const seeds=[
+  // strong seasonal, season ahead -> maintain
+  {type:'seasonal',sku:'SHRW-NAVY-04',stock:120,prod:500,age:140,price:1450,profit:430,s30:60,s90:170,stotal:380,season:'Wedding',windows:'0',rso:'5',cogs:1020,finrate:18},
+  // festive kurta, 2 windows passed, weak sell-through -> fatigue
+  {type:'seasonal',sku:'KRTA-GOLD-12',stock:310,prod:450,age:410,price:990,profit:240,s30:8,s90:30,stotal:140,season:'Festive / Diwali',windows:'2',rso:'2',cogs:720,finrate:18},
+  // evergreen blazer, heavy coverage -> medium
+  {type:'evergreen',sku:'BLZR-BLK-08',stock:420,prod:600,age:300,price:1290,profit:360,s30:18,s90:55,stotal:300,season:'Year-round',windows:'0',rso:'3',cogs:910,finrate:18},
+  // old in days but pre-season, 0 windows -> age override, holds
+  {type:'seasonal',sku:'NEHRU-MRN-03',stock:200,prod:400,age:360,price:1150,profit:300,s30:30,s90:80,stotal:230,season:'Wedding',windows:'0',rso:'5',cogs:820,finrate:18},
+  // just produced, barely on shelf -> maturity gate holds it (no markdown despite weak ST/coverage)
+  {type:'evergreen',sku:'WCOAT-IVORY-21',stock:280,prod:300,age:35,price:760,profit:210,s30:12,s90:16,stotal:22,season:'Year-round',windows:'0',rso:'3',cogs:520,finrate:18,grace:60},
+];
+seeds.forEach(s=>portfolio.push({sku:s.sku,R:compute(s)}));
+
+renderLive();
+renderPortfolio();
+</script>
+</body>
+</html>
