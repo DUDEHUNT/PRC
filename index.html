@@ -201,6 +201,15 @@
   .calc{font:600 11px/1.4 'Space Mono',monospace;color:var(--ink-soft);margin-top:6px;background:#2c1f3c08;border-radius:7px;padding:6px 9px}
   .calc b{color:var(--ink)}
 
+  /* audit contribution breakdown */
+  .auditrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px!important}
+  .auditrow span{font:600 11px 'Space Mono',monospace;background:#fff;border:1px solid #FFB23E66;border-radius:7px;padding:4px 8px;color:#7a531a}
+  .auditrow span.total{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700}
+
+  /* capital lock banner */
+  .lockbanner{margin-top:16px;background:#FF3B5C12;border:1.5px solid var(--red);border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:12px;color:#c41f3f}
+  .lockbanner .amt{font-family:'Fraunces';font-weight:900;font-size:20px;line-height:1.1;margin-top:2px}
+
   /* ---------- Unit economics ---------- */
   .econ-card{margin-top:22px}
   .channel-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:16px}
@@ -325,17 +334,4 @@
               <option>Summer</option><option>Winter</option><option>Year-round</option>
             </select>
           </div>
-          <div class="f"><label>Seasonal windows passed</label>
-            <select id="windows">
-              <option value="0">0 — none yet</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3+</option>
-            </select>
-          </div>
-          <div class="f full"><label>Remaining seasonal opportunity</label>
-            <select id="rso">
-              <option value="5">5 — Entire major season still ahead</option>
-              <option value="4" selected>4 — Majority of season still ahead</option>
-              <option value="3">3 — Season currently active</option>
-              <option value="2">2 — Majority o
+          <div class="f"><label>Se
